@@ -16,7 +16,7 @@ Follow these steps to set up the project locally:
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/dat-file-editor.git
+git clone https://github.com/jcilacad/dat-file-editor.git
 cd dat-file-editor
 ```
 
@@ -24,15 +24,6 @@ cd dat-file-editor
 
 ```bash
 npm install
-```
-
-### Set Up Environment Variables
-
-1. Create a `.env.local` file in the root directory.
-2. Add any required environment variables (e.g., API keys or backend endpoints). Example:
-
-```plaintext
-NEXT_PUBLIC_API_URL=http://localhost:3000/api
 ```
 
 ## Running the Application
@@ -99,6 +90,34 @@ The application relies on the following backend API endpoints:
 ### Switch Themes
 
 - Use the **Dark Mode** or **Light Mode** button to toggle between themes.
+
+## Sample Table Structure
+
+### Unmodified DAT File
+
+```
+"First_Name"|"Middle_Name"|"Last_Name"|"Transaction_Type"|"Transaction_Amount"|"Transaction_Date"|"Currency"|"Bank_Account"|"Payment_Method"|"Check_Number"|"Bank_Reference"|"Customer_Reference"|"Details"|"Indicator"|"Account_Info"|"Receipt_ID"|"Source_Account"|"Surcharge"|"Card_Type"|"File_Name"|"Account_Holder"|"Masked_Card"|"Sequence_No"
+"John"|"A."|"Doe"|"Purchase"|"150.00"|"2024-02-25"|"USD"|"ACC-123"|"EFT"|""|"REF-9876"|"CUST-001"|"Item Purchase"|"N"|""|"567890"|""|""|"MasterCard"|"OriginalFile_20240304.DAT"|"Jane Smith"|"5678****1234"|"1"
+"Emily"|"C."|"Johnson"|"Purchase"|"320.00"|"2024-03-05"|"USD"|"ACC-789"|"EFT"|""|"REF-5678"|"CUST-003"|"Subscription Payment"|"N"|""|"789012"|""|""|"Visa"|"EditedFile_20240304.DAT"|"Sarah Lee"|"9012****3456"|"2"
+"David"|"D."|"Brown"|"Purchase"|"500.00"|"2024-03-06"|"GBP"|"ACC-654"|"Credit Card"|""|"REF-4321"|"CUST-004"|"Online Shopping"|"N"|""|"890123"|""|""|"Amex"|"EditedFile_20240304.DAT"|"Alice Green"|"3456****7890"|"3"
+"Jessica"|"E."|"Davis"|"Refund"|"75.00"|"2024-03-07"|"CAD"|"ACC-321"|"Bank Transfer"|""|"REF-8765"|"CUST-005"|"Refund Processed"|"N"|""|"901234"|""|""|"MasterCard"|"EditedFile_20240304.DAT"|"Mark Taylor"|"5678****1234"|"4"
+```
+
+As we can see I modified the first row by changing all of its field values.
+
+**TO BE CONTINUED**
+
+NEED TO ADD A FUNCTION TO ADD AND DELETE A RECORD.
+
+### Modified DAT File (After Editing & Download)
+
+```
+"First_Name"|"Middle_Name"|"Last_Name"|"Transaction_Type"|"Transaction_Amount"|"Transaction_Date"|"Currency"|"Bank_Account"|"Payment_Method"|"Check_Number"|"Bank_Reference"|"Customer_Reference"|"Details"|"Indicator"|"Account_Info"|"Receipt_ID"|"Source_Account"|"Surcharge"|"Card_Type"|"File_Name"|"Account_Holder"|"Masked_Card"|"Sequence_No"
+"Michael"|"B."|"Smith"|"Refund"|"200.00"|"2024-03-04"|"EUR"|"ACC-456"|"Wire Transfer"|""|"REF-1234"|"CUST-002"|"Refund for service"|"N"|""|"678901"|""|""|"Visa"|"EditedFile_20240304.DAT"|"John Doe"|"1234****5678"|"2"
+"Emily"|"C."|"Johnson"|"Purchase"|"320.00"|"2024-03-05"|"USD"|"ACC-789"|"EFT"|""|"REF-5678"|"CUST-003"|"Subscription Payment"|"N"|""|"789012"|""|""|"Visa"|"EditedFile_20240304.DAT"|"Sarah Lee"|"9012****3456"|"2"
+"David"|"D."|"Brown"|"Purchase"|"500.00"|"2024-03-06"|"GBP"|"ACC-654"|"Credit Card"|""|"REF-4321"|"CUST-004"|"Online Shopping"|"N"|""|"890123"|""|""|"Amex"|"EditedFile_20240304.DAT"|"Alice Green"|"3456****7890"|"3"
+"Jessica"|"E."|"Davis"|"Refund"|"75.00"|"2024-03-07"|"CAD"|"ACC-321"|"Bank Transfer"|""|"REF-8765"|"CUST-005"|"Refund Processed"|"N"|""|"901234"|""|""|"MasterCard"|"EditedFile_20240304.DAT"|"Mark Taylor"|"5678****1234"|"4"
+```
 
 ## Contributing
 
