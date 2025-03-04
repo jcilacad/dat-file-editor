@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 // Light and dark theme definitions
 const lightTheme = {
@@ -30,11 +30,14 @@ export default function Home() {
   const [dataRows, setDataRows] = useState([]);
   const [fileName, setFileName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false); // Toggle for dark mode
-  const fileInputRef = useRef(null); // Ref for file input
-  const searchInputRef = useRef(null); // Ref for search input
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [addAfterRow, setAddAfterRow] = useState(''); // State for specifying where to add a record
+  const [newRowIndex, setNewRowIndex] = useState(null); // Track the newly added row
+  const fileInputRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const tableRef = useRef(null); // Reference to the table for scrolling
 
-  const theme = isDarkMode ? darkTheme : lightTheme; // Active theme
+  const theme = isDarkMode ? darkTheme : lightTheme;
 
   // Fetch initial data
   const fetchData = async () => {
@@ -75,6 +78,67 @@ export default function Home() {
   const handleDownload = () => {
     window.location.href = '/api/download';
   };
+
+  // Add a new record
+  const handleAddRecord = () => {
+    const position = parseInt(addAfterRow, 10);
+    const newRow = headers.map(() => ''); // Create a new row with empty strings
+    let updatedRows = [...dataRows];
+    let insertIndex;
+
+    if (isNaN(position) || position < 0) {
+      // Add at the end if input is invalid or empty
+      updatedRows.push(newRow);
+      insertIndex = updatedRows.length - 1;
+    } else if (position === 0) {
+      // Add at the top
+      updatedRows.unshift(newRow);
+      insertIndex = 0;
+    } else {
+      // Add after the specified row, capping at the end if position exceeds row count
+      insertIndex = Math.min(position, updatedRows.length);
+      updatedRows.splice(insertIndex, 0, newRow);
+    }
+
+    setDataRows(updatedRows);
+    setNewRowIndex(insertIndex); // Set the new row index for focusing
+    setAddAfterRow(''); // Clear the input
+  };
+
+  // Delete a record with confirmation if it has data
+  const handleDelete = (rowIndex) => {
+    const row = dataRows[rowIndex];
+    const hasData = row.some(cell => cell.trim() !== '');
+
+    if (hasData) {
+      const confirmDelete = confirm('Are you sure you want to delete this record? It contains data.');
+      if (!confirmDelete) {
+        return;
+      }
+    }
+
+    const updatedRows = dataRows.filter((_, index) => index !== rowIndex);
+    setDataRows(updatedRows);
+  };
+
+  // Scroll to and focus on the new row when newRowIndex changes
+  useEffect(() => {
+    if (newRowIndex !== null && tableRef.current) {
+      // Select the new row (adjust for header row)
+      const rowElement = tableRef.current.querySelector(`tbody tr:nth-child(${newRowIndex + 1})`);
+      if (rowElement) {
+        // Scroll the row into view smoothly
+        rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Focus on the first input field in the new row
+        const firstInput = rowElement.querySelector('input');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }
+      setNewRowIndex(null); // Reset the index after focusing
+    }
+  }, [newRowIndex]);
 
   // Scroll to first search match
   const scrollToFirstMatch = () => {
@@ -152,6 +216,40 @@ export default function Home() {
               >
                 Download
               </button>
+              {/* Add Record Controls */}
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input
+                  type="number"
+                  placeholder="After row (0 for top)"
+                  value={addAfterRow}
+                  onChange={(e) => setAddAfterRow(e.target.value)}
+                  style={{
+                    padding: '12px',
+                    border: `1px solid ${theme.inputBorder}`,
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    width: '100px',
+                    backgroundColor: theme.inputBg,
+                    color: theme.text,
+                    outline: 'none'
+                  }}
+                />
+                <button
+                  onClick={handleAddRecord}
+                  style={{
+                    backgroundColor: theme.buttonBg,
+                    color: theme.buttonText,
+                    border: 'none',
+                    padding: '12px 24px',
+                    cursor: 'pointer',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    transition: 'background-color 0.3s'
+                  }}
+                >
+                  Add Record
+                </button>
+              </div>
             </>
           )}
           <button
@@ -219,11 +317,44 @@ export default function Home() {
 
         {headers.length > 0 && (
           <>
-            {/* Scrollable Table */}
-            <div style={{ overflowX: 'auto', marginTop: '30px' }}>
-              <table style={{ borderCollapse: 'collapse', width: '100%', tableLayout: 'auto' }}>
+            {/* Scrollable Table with Sticky Header */}
+            <div style={{
+              overflowX: 'auto',           // Preserve horizontal scrolling
+              overflowY: 'auto',           // Enable vertical scrolling
+              maxHeight: '500px',          // Set a maximum height for scrolling
+              marginTop: '30px'            // Optional spacing
+            }}>
+              <table ref={tableRef} style={{ borderCollapse: 'collapse', width: '100%', tableLayout: 'auto' }}>
                 <thead>
                   <tr>
+                    <th style={{
+                      width: '50px',
+                      border: `1px solid ${theme.tableBorder}`,
+                      padding: '12px',
+                      backgroundColor: theme.tableHeaderBg,
+                      color: theme.text,
+                      fontWeight: '600',
+                      textAlign: 'center',
+                      position: 'sticky',       // Make header sticky
+                      top: 0,                  // Stick to the top
+                      zIndex: 1                // Keep above table body
+                    }}>
+                      #
+                    </th>
+                    <th style={{
+                      width: '100px',
+                      border: `1px solid ${theme.tableBorder}`,
+                      padding: '12px',
+                      backgroundColor: theme.tableHeaderBg,
+                      color: theme.text,
+                      fontWeight: '600',
+                      textAlign: 'center',
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 1
+                    }}>
+                      Actions
+                    </th>
                     {headers.map((header, index) => (
                       <th
                         key={index}
@@ -234,7 +365,10 @@ export default function Home() {
                           color: theme.text,
                           fontWeight: '600',
                           textAlign: 'left',
-                          whiteSpace: 'nowrap'
+                          whiteSpace: 'nowrap',
+                          position: 'sticky',
+                          top: 0,
+                          zIndex: 1
                         }}
                       >
                         {header}
@@ -245,10 +379,36 @@ export default function Home() {
                 <tbody>
                   {dataRows.map((row, rowIndex) => (
                     <tr key={rowIndex}>
+                      <td style={{
+                        border: `1px solid ${theme.tableBorder}`,
+                        padding: '12px',
+                        textAlign: 'center'
+                      }}>
+                        {rowIndex + 1}
+                      </td>
+                      <td style={{
+                        border: `1px solid ${theme.tableBorder}`,
+                        padding: '12px',
+                        textAlign: 'center'
+                      }}>
+                        <button
+                          onClick={() => handleDelete(rowIndex)}
+                          style={{
+                            backgroundColor: theme.buttonBg,
+                            color: theme.buttonText,
+                            border: 'none',
+                            padding: '6px 12px',
+                            cursor: 'pointer',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            transition: 'background-color 0.3s'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
                       {row.map((cell, colIndex) => {
-                        const isHighlighted =
-                          searchQuery &&
-                          cell.toLowerCase().includes(searchQuery.toLowerCase());
+                        const isHighlighted = searchQuery && cell.toLowerCase().includes(searchQuery.toLowerCase());
                         return (
                           <td
                             key={colIndex}
@@ -257,7 +417,7 @@ export default function Home() {
                               border: `1px solid ${theme.tableBorder}`,
                               padding: '12px',
                               backgroundColor: isHighlighted ? theme.highlight : 'transparent',
-                              whiteSpace: 'nowrap' // Prevent text wrapping
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             <input
@@ -267,8 +427,8 @@ export default function Home() {
                               style={{
                                 border: 'none',
                                 borderBottom: `1px solid ${theme.inputBorder}`,
-                                width: 'auto',                     // Let the input size itself based on content
-                                minWidth: `${Math.max(cell.length, 5)}ch`, // Ensure it’s at least wide enough for the content
+                                width: 'auto',
+                                minWidth: `${Math.max(cell.length, 5)}ch`,
                                 outline: 'none',
                                 backgroundColor: 'transparent',
                                 color: theme.text,
